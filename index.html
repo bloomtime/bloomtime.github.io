@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Bloom: new ways to see and communicate</title>
+        <link rel="shortcut icon" href="/images/favicon.gif" />
+        <script src="http://use.typekit.com/rdl4muo.js"></script>
+        <script src="jquery.js" type="text/javascript"></script>
+        <script>
+
+            // <3 Small Batch
+            try{Typekit.load();}catch(e){}
+
+            // :-p Google
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-20672308-1']);
+            _gaq.push(['_trackPageview']);
+            (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+
+            // hat-tip http://css3please.com for the various flavors
+            // (heinous browser sniffing is all ours)
+            var MSIE = navigator.userAgent.match(/MSIE \d\.?\d?/);
+            var ie = MSIE && MSIE.length > 0 ? parseInt(MSIE[0].split(' ').pop()) : false;
+            function setRotation(e, deg) {
+                var rot = 'rotate('+deg.toFixed(3)+'deg)';
+                if ('MozTransform' in e.style) {
+                    e.style.MozTransform = rot;
+                }
+                else if (ie && ie < 9 && 'filter' in e.style) {
+                    var rad = Math.PI * 2 * deg / 360.0;
+                    var s = Math.sin(rad);
+                    var c = Math.cos(rad);
+                    e.filters.item(0).M11 = c;
+                    e.filters.item(0).M12 = -s;
+                    e.filters.item(0).M21 = s;
+                    e.filters.item(0).M22 = c;
+                }
+                else {
+                    e.style['-webkit-transform'] = e.style['-o-transform'] = e.style['-ms-transform'] = e.style['transform'] = rot;
+                }
+            }
+            // *returns hat once more*
+
+            // !!! hand-rolled parallax script - super-specific to this site, not exactly modular ;)
+            $(function() {
+
+                // move the mission layers, since we'll have parallax
+                var fixed = $('#mission div.fixed');
+                var foreground = $('#mission div.foreground');
+                $('#mission').append(fixed);
+                $('#mission').append(foreground);
+
+                // cache these if possible
+                var sections = $('div.section');
+                var sectionHeights = sections.map(function() { return $(this).height() });
+                var sectionTops = sections.map(function() { return $(this).offset().top });
+                var sectionForegrounds = $('div.section div.foreground');
+
+                var $fizz = $('#fizz');
+                var $carta = $('#cartagram');
+                var fizzGrab = $fizz.find('.grab')[0];
+                var cartaGrab = $carta.find('.grab')[0];
+                var fizzHeight = $fizz.height();
+                var cartaHeight = $carta.height();
+                var fizzTop = $fizz.offset().top;
+                var cartaTop = $carta.offset().top;
+
+                $(window).bind('scroll', function() {
+
+                    var scroll = $(document).scrollTop(),
+                        scrollBottom = scroll + window.innerHeight;
+
+                    sections.each(function(i) {
+                        var sectionTop = sectionTops[i],
+                            sectionBottom = (sectionTop + sectionHeights[i]),
+                            aboveScreen = scroll > sectionBottom,
+                            belowScreen = scrollBottom < sectionTop,
+                            offScreen = aboveScreen || belowScreen;
+                        if (!offScreen) {
+
+                            var relativeScroll = scroll - sectionTop;
+                            var section = this;
+                            var y = 0.25 * relativeScroll;
+
+                            if (this.id == 'people') {
+                                y += 200;
+                            }
+
+                            //var pos = section.style.backgroundPosition;
+                            //var currentY = pos ? Number(pos.split(' ')[1].replace('px','')) : 0;
+
+                            //if (Math.abs(currentY-y) > 1) {
+                                section.style.backgroundPosition = '0 ' + y + 'px';
+                            //}
+
+                            var foreground = sectionForegrounds[i];
+                            var scaleFactor = -0.65;
+                            if (this.id == 'planetary' || this.id == 'biologic') {
+                                scaleFactor = -0.35;
+                            }
+                            var t = scaleFactor * relativeScroll;
+                            if (i == sections.length-1) { // final section
+                                t = Math.max(0,t);
+                            }
+                            foreground.style.top = t +'px';
+                            if (this.id == 'planetary') {
+                                foreground.style.left = -t +'px';
+                            }
+
+                            if (this.id == 'fizz') {
+                                // rotate screengrab in Fizz section
+                                var deg = -2.0 + (Math.sin(4.0 * relativeScroll / fizzHeight) * 4.0);
+                                setRotation(fizzGrab, deg);
+                            }
+                            else if (this.id == 'cartagram') {
+                                // rotate screengrab in Cartagram section
+                                var deg = -2.0 + (Math.sin(4.0 * relativeScroll / cartaHeight) * 4.0);
+                                setRotation(cartaGrab, deg);
+                            }
+                        }
+                    });
+                });
+
+                // make sure everything's in the right place before a jump
+                $(window).trigger('scroll');
+
+                $('#nav a').click(function() {
+                  var link = this,
+                      target = $(link.hash).offset().top,
+                      current = $(document).scrollTop(),
+                      distance = target - current,
+                      duration = Math.abs(distance) / 2.0; // px / px/ms = ms
+                  $('html,body').animate({ scrollTop: target }, duration, function() {
+                    window.location = link.href;
+                  });
+                  return false;
+                });
+
+            }); // domready
+
+        </script>
+        <style>
+            html, body {
+                background: black;
+                color: white;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                border: 0;
+            }
+            h2, h4, blockquote, p, label, input, button, li {
+                font-family: "myriad-pro-1","myriad-pro-2",sans-serif;
+                line-height: 1.25;
+                font-weight: normal;
+            }
+            h1, h3 {
+                font-family: "ff-unit-rounded-web-1","ff-unit-rounded-web-2",sans-serif;
+                font-weight: 900;
+                text-transform: lowercase;
+            }
+            a, a:link, a:visited, a:hover, a:active {
+                color: white;
+                text-decoration: underline;
+            }
+            h3 a, h3 a:link, h3 a:visited, h3 a:hover, h3 a:active {
+                text-decoration: none;
+            }
+
+            div.section {
+                position: relative;
+                overflow: hidden;
+                width: 1000px;
+                height: 618px;
+                margin: 0px auto;
+                padding: 0px;
+            }
+            div.section h3 {
+                font-size: 72px;
+                margin: 50px 0 0 50px;
+            }
+            div.foreground, div.fixed {
+                position: absolute;
+                display: block;
+            }
+
+/* HOME */
+            #home {
+                height: 718px;
+                background: #fff url(./parallax.bloom.io/home/background.jpg) no-repeat;
+                color: #222;
+            }
+            #home div.fixed {
+                width: 1000px;
+                height: 150px;
+                background: url(./parallax.bloom.io/home/fixed.png) no-repeat top left;
+            }
+            #home div.foreground {
+                width: 1000px;
+                height: 600px;
+                background: url(./parallax.bloom.io/home/foreground.png) no-repeat top left;
+            }
+
+            #home div.fixed {
+                bottom: 0;
+                left: 0;
+            }
+            #home div.foreground {
+                margin-top: 800px;
+            }
+            #home h1, #home h2, #home form, #home p {
+                display: block;
+                position: absolute;
+                margin: 0px;
+                padding: 0px;
+            }
+            #home h1 {
+                font-size: 96px;
+                left: 464px;
+                top: 325px;
+            }
+            #home h2 {
+                font-size: 14px;
+                left: 466px;
+                top: 429px;
+            }
+            #home form, #home p.thanks {
+                font-size: 14px;
+                left: 466px;
+                top: 472px;
+            }
+            #home button {
+                font-size: 14px;
+                margin: 3px 0px 0px 0px;
+                padding: 3px 5px;
+                background-color: #222;
+                border-radius: 3px;
+                border: 1px solid #000;
+                color: #eff;
+            }
+            #home input {
+                font-size: 14px;
+                margin: 3px 0px 0px 0px;
+                width: 184px;
+                padding: 3px 5px;
+                background: #eff;
+                border-radius: 3px;
+                border: 1px solid #222;
+            }
+            #home label {
+                width: 400px;
+            }
+            #home label a, #home h2 a {
+                color: black;
+            }
+
+
+/* MISSION */
+            #mission {
+                background: #000 url(./parallax.bloom.io/mission/background.jpg) no-repeat;
+                /* this is the only one that's likely to be visible onload */
+                background-position: 0px -80px;
+            }
+            #mission div.fixed {
+                width: 1000px;
+                height: 271px;
+                background: url(./parallax.bloom.io/mission/fixed.png) no-repeat top left;
+            }
+            #mission div.foreground {
+                width: 1000px;
+                height: 700px;
+                background: url(./parallax.bloom.io/mission/foreground.png) no-repeat top left;
+            }
+
+            #mission h2, #mission p {
+                position: relative;
+                display: block;
+            }
+            #mission h3 {
+                font-weight: 700;
+                font-size: 42px;
+                margin: 275px 10px 0 165px;
+            }
+            #mission h3 img {
+                margin-bottom: -15px;
+            }
+            #mission p {
+                text-align: justify;
+                font-size: 17px;
+                margin: 10px 115px 0 115px;
+            }
+            #mission div.fixed {
+                top: 0;
+            }
+            #mission div.foreground {
+                margin-top: -480px;
+            }
+
+
+/* PEOPLE */
+            #people {
+                background: #000 url(./parallax.bloom.io/about/background.jpg) no-repeat;
+                bottom: 0;
+                color: #FFF;
+                height: 1700px;
+            }
+            #people div.fixed {
+                width: 1000px;
+                height: 452px;
+                bottom: 0;
+                left: 0;
+                background: url(./parallax.bloom.io/about/fixed.png) no-repeat top left;
+            }
+            #people div.foreground {
+                width: 1000px;
+                height: 428px;
+                margin-top: 2000px;
+                left: 200px;
+                background: url(./parallax.bloom.io/about/foreground.png) no-repeat top left;
+            }
+
+            div.person {
+                position: relative;
+                width: 810px;
+                margin: 0 0 50px 100px;
+            }
+            div#ben {
+                margin-top: 150px;
+            }
+            /* IMAGE */
+            div.person img {
+                display: block;
+                float: left;
+            }
+            /* NAME and TITLE */
+            div.person h3, div.person h4 {
+                display: inline-block;
+                margin: 0 0 0 25px;
+                padding: 0;
+            }
+            /* NAME */
+            div.person h3, div.person h3 a {
+                text-shadow: 0 0 0.1em #fd290c;
+                font-weight: 700;
+                font-size: 36px;
+                line-height: 29px;
+                color: #fd290c;
+            }
+            /* TITLE */
+            div.person h4 {
+                font-weight: normal;
+            }
+            /* DESCRIPTION */
+            div.person p {
+                background: rgba(0, 0, 0, 0.5);
+                font-size: 14px;
+                line-height: 1.3;
+                text-align: justify;
+                margin: 3px 0px 0px 115px;
+                padding: 10px;
+                border-radius: 10px;
+            }
+
+/* BIOLOGIC */
+            #biologic {
+                background: #000 url(./parallax.bloom.io/biologic/background.jpg) no-repeat;
+                border-top: 15px solid black;
+            }
+            #biologic div.fixed {
+                width: 427px;
+                height: 420px;
+                left: 485px;
+                top: 115px;
+                background: url(./parallax.bloom.io/biologic/services.png) no-repeat top left;
+            }
+            #biologic div.foreground {
+                width: 519px;
+                height: 508px;
+                margin-top: -250px;
+                left: 0px;
+                background: url(./parallax.bloom.io/biologic/cell.png) no-repeat top left;
+            }
+            #biologic .grab {
+                position: absolute;
+                left: 90px;
+                top: 305px;
+                width: 169px;
+                height: 207px;
+                zoom: 1;
+            }
+            #biologic .grab a, #planetary .grab a img {
+                position: relative;
+                display: block;
+                padding: 0; margin: 0; border: 0;
+            }
+            #biologic div.fixed {
+                margin-top: 0;
+            }
+            #biologic h3, #biologic p {
+                position: absolute;
+                margin: 0;
+            }
+            #biologic h3 {
+                font-weight: 800;
+                left: 90px;
+                top: 190px;
+                text-shadow: 0 0 8px #236;
+            }
+            #biologic p {
+                background: rgba(0, 0, 0, 0.5);
+                left: 90px;
+                top: 278px;
+                font-size: 14px;
+                padding: 0px 10px;
+            }
+
+/* PLANETARY */
+            #planetary {
+                background: #000 url(./parallax.bloom.io/planetary/background.jpg) no-repeat;
+                border-top: 15px solid black;
+            }
+            #planetary div.fixed {
+                width: 600px;
+                height: 618px;
+                left: 140px;
+                top: 275px;
+                background: url(./parallax.bloom.io/planetary/planet.png) no-repeat top left;
+            }
+            #planetary div.foreground {
+                width: 413px;
+                height: 800px;
+                background: url(./parallax.bloom.io/planetary/moon.png) no-repeat 290px 315px;
+            }
+            #planetary .grab {
+                position: absolute;
+                left: 490px;
+                top: 315px;
+                width: 207px;
+                height: 169px;
+                zoom: 1;
+            }
+            #planetary .grab a, #planetary .grab a img {
+                position:relative;
+                display:block;
+                padding: 0; margin: 0; border: 0;
+            }
+            #planetary div.fixed {
+                margin-top: 0;
+            }
+            #planetary h3, #planetary p {
+                position: absolute;
+                margin: 0;
+            }
+            #planetary h3 {
+                font-weight: 800;
+                left: 490px;
+                top: 200px;
+                text-shadow: 0 0 8px #8ef;
+            }
+            #planetary p {
+                background: rgba(0, 0, 0, 0.75);
+                left: 490px;
+                top: 288px;
+                font-size: 14px;
+                padding: 0px 10px;
+            }
+
+/* FIZZ */
+            #fizz {
+                background: #000 url(./parallax.bloom.io/fizz/background.jpg) no-repeat;
+                border-top: 15px solid black;
+            }
+            #fizz div.fixed {
+                width: 600px;
+                height: 618px;
+                background: url(./parallax.bloom.io/fizz/fixed.png) no-repeat top left;
+            }
+            #fizz div.foreground {
+                width: 413px;
+                height: 800px;
+                background: url(./parallax.bloom.io/fizz/foreground.png) no-repeat top left;
+            }
+            #fizz .grab {
+                position: absolute;
+                right: 70px;
+                top: 95px;
+                width: 310px;
+                height: 280px;
+                -moz-transform: rotate(2deg);
+                -o-transform: rotate(2deg);
+                -webkit-transform: rotate(2deg);
+                -ms-transform: rotate(2deg);
+                transform: rotate(2deg);
+                -ms-filter:"progid:DXImageTransform.Microsoft.Matrix(M11=0.9993908270190958, M12=-0.03489949670250097, M21=0.03489949670250097, M22=0.9993908270190958, sizingMethod='auto expand')";
+                filter:progid:DXImageTransform.Microsoft.Matrix(M11=0.9993908270190958, M12=-0.03489949670250097, M21=0.03489949670250097, M22=0.9993908270190958, sizingMethod='auto expand');
+                zoom: 1;
+            }
+            #fizz .grab a, #fizz .grab a img {
+                position: relative;
+                display: block;
+                padding: 0; margin: 0; border: 0;
+            }
+            #fizz div.fixed {
+                margin-top: 0;
+            }
+            #fizz h3, #fizz p {
+                position: absolute;
+                margin: 0;
+            }
+            #fizz h3 {
+                font-weight: 800;
+                left: 350px;
+                top: 170px;
+                text-shadow: 0 0 0.35em #000;
+            }
+            #fizz p {
+                background: rgba(0, 0, 0, 0.75);
+                left: 350px;
+                top: 248px;
+                font-size: 14px;
+                padding: 0px 10px;
+            }
+
+
+/* CARTAGRAM */
+            #cartagram {
+                background: #000 url(./parallax.bloom.io/cartagram/background.jpg) no-repeat;
+                border-top: 15px solid black;
+            }
+            #cartagram div.fixed {
+                width: 1000px;
+                height: 418px;
+                background: url(./parallax.bloom.io/cartagram/fixed.png) no-repeat top left;
+            }
+            #cartagram div.foreground {
+                width: 574px;
+                height: 605px;
+                background: url(./parallax.bloom.io/cartagram/foreground.png) no-repeat top left;
+            }
+            #cartagram .grab {
+                position: absolute;
+                width: 310px;
+                height: 280px;
+                left: 125px;
+                top: 100px;
+                -moz-transform: rotate(1deg);
+                -o-transform: rotate(1deg);
+                -webkit-transform: rotate(1deg);
+                -ms-transform: rotate(1deg);
+                transform: rotate(1deg);
+                -ms-filter:"progid:DXImageTransform.Microsoft.Matrix(sizingMethod='auto expand', M11=0.9998476951563913, M12=-0.01745240643728351, M21=0.01745240643728351, M22=0.9998476951563913)";
+                filter:progid:DXImageTransform.Microsoft.Matrix(sizingMethod='auto expand', M11=0.9998476951563913, M12=-0.01745240643728351, M21=0.01745240643728351, M22=0.9998476951563913);
+                zoom: 1;
+            }
+            #cartagram .grab a, #cartagram .grab a img {
+                position:relative;
+                display:block;
+                padding: 0; margin: 0; border: 0;
+            }
+            #cartagram div.fixed {
+                bottom: 0;
+            }
+            #cartagram div.foreground {
+                right: 0;
+            }
+            #cartagram h3, #cartagram p {
+                position: absolute;
+                margin: 0;
+            }
+            #cartagram h3 {
+                font-weight: 800;
+                left: 470px;
+                top: 100px;
+                text-shadow: 0 0 0.35em #000;
+            }
+            #cartagram p {
+                background: rgba(0, 0, 0, 0.75);
+                left: 470px;
+                top: 185px;
+                font-size: 14px;
+                padding: 0px 10px;
+            }
+
+
+/* MORE */
+            #more {
+                height: 750px;
+                background: #000 url(./parallax.bloom.io/contact/background.jpg) no-repeat;
+                border-top: 15px solid black;
+                margin-bottom: 100px;
+            }
+            #more div.fixed {
+                width: 1000px;
+                height: 750px;
+                background: url(./parallax.bloom.io/contact/fixed.png) no-repeat top left;
+            }
+            #more div.foreground {
+                width: 1000px;
+                height: 800px;
+                background: url(./parallax.bloom.io/contact/foreground.png) no-repeat top left;
+            }
+            #more blockquote {
+                position: absolute;
+                font-size: 17px;
+                text-align: justify;
+                width: 69%;
+                top: 50px;
+                left: 100px;
+                padding: 15px;
+                line-height: 22px;
+            }
+            #more blockquote span.credit {
+                color: white;
+                display: block;
+                text-align: right;
+            }
+            #more div.foreground {
+                margin-top: 0;
+            }
+            #more div.fixed {
+                margin-top: 50px;
+            }
+
+            #contact {
+                font-family: "ff-unit-rounded-web-1","ff-unit-rounded-web-2",sans-serif;
+                text-transform: lowercase;
+                font-size: 32px;
+                font-weight: 700;
+                position: absolute;
+                margin: 0 0 35px 0;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                text-align: center;
+            }
+            #more div.feed {
+                position: absolute;
+                background: rgba(60,60,60,0.3);
+                padding: 15px 15px 5px 15px;
+                border-radius: 3px;
+                border-bottom: 1px solid rgba(60,60,60,0.3);
+                border-right: 1px solid rgba(60,60,60,0.3);
+                -webkit-box-shadow: -2px -2px 2px rgba(0,0,0,0.25);
+                -moz-box-shadow: -2px -2px 2px rgba(0,0,0,0.25);
+                box-shadow: -2px -2px 2px rgba(0,0,0,0.25);
+            }
+            #more div.post {
+                margin-bottom: 10px;
+            }
+            #more div.feed h3 {
+                margin: 0 0 10px 0;
+                font-size: 32px;
+                line-height: 32px;
+                font-weight: 700;
+            }
+            #more div.feed p {
+                margin: 10px 0 0 0;
+                display: inline;
+                font-size: 12px;
+                font-weight: normal;
+                line-height: 14px;
+            }
+            #more div.feed h4 {
+                display: inline;
+                margin: 10px 0 0 0;
+                font-size: 14px;
+                font-weight: normal;
+                line-height: 14px;
+            }
+            #more div#twitter {
+                left: 150px;
+                width: 325px;
+                top: 275px;
+            }
+            #more div#blog {
+                right: 150px;
+                width: 250px;
+                top: 275px;
+            }
+
+            ul#nav {
+                right: 40px;
+                border: 0;
+                top: 30px;
+                position: absolute;
+                text-align: right;
+                list-style-type: none;
+                display: block;
+                z-index: 100;
+            }
+            ul#nav li {
+                display: block;
+                margin-bottom: 16px;
+            }
+            ul#nav li a {
+                text-decoration: none;
+                margin: 0 3px;
+                padding: 3px 12px;
+                border: 0;
+                vertical-align: middle;
+                color: #000;
+                font-size: 18px;
+                font-weight: normal;
+                line-height: 1.0;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="section" id="home">
+            <h1>Bloom</h1>
+            <h2>Pop-cultural instruments for data expression and exploration.
+              <br>Founded 08/2010 &hellip; <a href="http://blog.bloom.io/2012/11/01/this-bloom-is-off-the-vine/">Closed 11/2012</a></h2>
+
+            <ul id="nav">
+
+              <li><a href="#mission" style="text-shadow: 1px 1px 8px rgba(100,200,220,0.5);">Mission</a></li>
+
+              <li><a href="#planetary" style="text-shadow: 1px 1px 8px rgba(111,182,170,0.5);">Planetary</a></li>
+
+              <li><a href="#biologic" style="text-shadow: 1px 1px 8px rgba(122,165,124,0.5);">Biologic</a></li>
+
+              <li><a href="#fizz" style="text-shadow: 1px 1px 8px rgba(133,147,83,0.5);">Fizz</a></li>
+
+              <li><a href="#cartagram" style="text-shadow: 1px 1px 8px rgba(145,130,51,0.5);">Cartagram</a></li>
+
+              <li><a href="#people" style="text-shadow: 1px 1px 8px rgba(156,112,30,0.5);">People</a></li>
+
+              <li><a href="#more" style="text-shadow: 1px 1px 8px rgba(167,95,20,0.5);">Learn More</a></li>
+
+              <li><a href="#contact" style="text-shadow: 1px 1px 8px rgba(178,77,23,0.5);">Contact</a></li>
+
+            </ul>
+
+
+            <div class="fixed"></div>
+            <div class="foreground"></div>
+        </div>
+
+        <div class="section" id="mission">
+            <div class="fixed"></div>
+            <div class="foreground"></div>
+            <h3>data visualization <img src="./parallax.bloom.io/mission/meets.png" alt="meets" width="96" height="54"> game design</h3>
+            <p>Bloom is creating a new type of visual discovery experience on tablets, media consoles, and modern browsers that will provide you with playful, explorable, visually compelling views on personally relevant information from services like Facebook, Twitter, Instagram, and iTunes.
+            <br><br>These Bloom Instruments aren’t merely games or graphics. They're new ways of seeing what's important.</p>
+        </div>
+
+                <div class="section" id="planetary">
+            <div class="fixed"></div>
+
+            <h3><a href="http://planetary.bloom.io">Planetary</a></h3>
+            <p>A stunning new way to explore your music collection</p>
+
+                <div class="foreground"></div>
+
+            <div class="grab">
+                <a href="http://planetary.bloom.io" target="_blank" title="learn more about planetary"><img src="./parallax.bloom.io/planetary/ipad.png" width="207" height="169"></a>
+            </div>
+        </div>
+        <div class="section" id="biologic">
+            <div class="fixed"></div>
+
+                <div class="foreground"></div>
+
+            <h3><a href="http://biologic.bloom.io">Biologic</a></h3>
+            <p>A playful and engaging way to explore updates from your friends</p>
+
+            <div class="grab">
+                <a href="http://biologic.bloom.io" target="_blank" title="learn more about biologic"><img src="./parallax.bloom.io/biologic/ipad.png" width="158" height="203"></a>
+            </div>
+        </div>
+        <div class="section" id="fizz">
+            <div class="fixed"></div>
+
+            <h3><a href="http://fizz.bloom.io">Fizz</a></h3>
+            <p>A colorful view of Twitter and Facebook</p>
+
+                <div class="foreground"></div>
+
+            <div class="grab">
+                <a href="http://fizz.bloom.io" target="_blank" title="launch Fizz"><img src="./parallax.bloom.io/fizz/grab.png" width="310" height="280"></a>
+            </div>
+        </div>
+        <div class="section" id="cartagram">
+            <div class="fixed"></div>
+
+            <h3><a href="http://cartagr.am">Cartagram</a></h3>
+            <p>Instagram favorites, geotagged and mapped</p>
+
+                <div class="foreground"></div>
+
+            <div class="grab">
+                <a href="http://cartagr.am" target="_blank" title="launch Cartagram"><img src="./parallax.bloom.io/cartagram/grab.png" width="310" height="280"></a>
+            </div>
+        </div>
+
+
+        <div class="section" id="people">
+                        <div class="person" id="ben">
+                <img src="./parallax.bloom.io/about/ben.jpg" width="100" height="114">
+                <h3><a href="#ben">Ben Cerveny</a></h3>
+                <h4>President</h4>
+                <p>Ben has worked for over 20 years on user interaction and experience design, concept prototyping, and strategy in the context of media applications, operating systems, web services, ubiquitous computing, and massively multiplayer games. Most recently, he was an advisor and strategist at <a href="http://stamen.com">Stamen Design</a>, a leading visualization design studio. Previously, he was the founder of the Experience Design Lab at <a href="http://frogdesign.com">frogdesign</a>, an international product design company, and a lead game designer and platform development strategist at Ludicorp, makers of <a href="http://flickr.com">Flickr</a>.  He is also the founder of the Amsterdam-based research foundation <a href="http://vurb.eu">VURB</a>, which investigates digital urbanism, and is constantly engaged in the investigation of innovative ways to improve the flow and play of a user's relationship with task or information.</p>
+            </div>
+            <div class="person" id="tom">
+                <img src="./parallax.bloom.io/about/tom.jpg" width="100" height="114">
+                <h3><a href="http://www.tom-carden.co.uk">Tom Carden</a></h3>
+                <h4>Chief Technology Officer</h4>
+                <p>Tom creates dynamic and interactive graphics, maps, and data visualizations for the web. At <a href="http://stamen.com">Stamen Design</a> he created innovative software for clients like Microsoft, MSNBC, Trulia, and the London Organizing Committee for the Olympic Games. Previously, wrote passenger flow simulation software for <a href="http://www.yrm.co.uk">YRM</a>, a London-based architectural studio. He was an active and early participant in the <a href="http://processing.org">Processing</a> and <a href="http://openstreetmap.org">OpenStreetMap</a> communities and has spoken at conferences including South by Southwest, UX Week, ETech, and Where 2.0. He holds a B.Sc. in Artificial Intelligence with Mathematics from the University of Leeds and an M.Sc. in Virtual Environments, Imaging and Visualisation from University College London.</p>
+            </div>
+            <div class="person" id="jesper">
+                <img src="./parallax.bloom.io/about/jesper.jpg" width="100" height="114">
+                <h3><a href="http://jesperandersen.net/">Jesper Sparre Andersen</a></h3>
+                <h4>General Manager</h4>
+                <p>Jesper develops experimental online services designed to introduce emotional contexts into online relationships, creating more authentic experiences. He is also an accomplished data scientist, working on problems including home valuations for <a href="http://trulia.com">Trulia</a>, credit card fraud for <a href="http://visa.com">Visa</a>, and social network analysis for Visible Path. Jesper speaks frequently at international technology and design conferences and has appeared in print and broadcast media for projects like Avoidr, Freerisk, and his Foursquare privacy hack. He holds a B.Sc. in Physics from Haverford College and an M.B.A. in Econometrics from University of Chicago.</p>
+            </div>
+
+            <div class="fixed"></div>
+            <div class="foreground"></div>
+        </div>
+
+        <div class="section" id="more">
+
+            <div class="fixed"></div>
+            <div class="foreground"></div>
+            <blockquote>People think of data visualization as output, and the
+               insight that I think Ben has had with Bloom is that data visualization
+               will become a means of input and control... Being able to manipulate
+               data in real-time is an important shift. Data visualizations would
+               then become interfaces rather than reports.<br>
+            <span class="credit">- <a href="http://radar.oreilly.com/2011/02/singly-locker-project-telehash.html">Tim O'Reilly</a></span></blockquote>
+
+            <div id="blog" class="feed">
+                <h3><a href="http://blog.bloom.io">bloom blog</a></h3>
+
+                <div class="post">
+                    <h4><a href="http://blog.bloom.io/2012/11/01/this-bloom-is-off-the-vine/">This Bloom is off the Vine</a></h4>
+                    <p><a href="http://blog.bloom.io/2012/11/01/this-bloom-is-off-the-vine/">2012/11/01</a></p>
+                </div>
+
+                <div class="post">
+                    <h4><a href="http://blog.bloom.io/2012/03/08/introducing-biologic/">Introducing Biologic</a></h4>
+                    <p><a href="http://blog.bloom.io/2012/03/08/introducing-biologic/">2012/03/08</a></p>
+                </div>
+
+                <div class="post">
+                    <h4><a href="http://blog.bloom.io/2011/09/16/https-ssl-table-stakes/">SSL and HTTPS are Table Stakes</a></h4>
+                    <p><a href="http://blog.bloom.io/2011/09/16/https-ssl-table-stakes/">2011/09/16</a></p>
+                </div>
+
+                <div class="post">
+                    <h4><a href="http://blog.bloom.io/2011/09/11/planetary-version-2/">Planetary, Version 2</a></h4>
+                    <p><a href="http://blog.bloom.io/2011/09/11/planetary-version-2/">2011/09/11</a></p>
+                </div>
+
+                <div class="post">
+                    <h4><a href="http://blog.bloom.io/2011/07/11/creating-new-worlds/">Creating new worlds</a></h4>
+                    <p><a href="http://blog.bloom.io/2011/07/11/creating-new-worlds/">2011/07/11</a></p>
+                </div>
+
+            </div>
+
+            <p id="contact">contact: <a href="http://twitter.com/neb">@neb</a>, <a href="http://twitter.com/randometc">@randometc</a>, <a href="http://twitter.com/jandersen">@jandersen</a></p>
+        </div>
+
+    </body>
+
+</html>
